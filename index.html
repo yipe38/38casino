@@ -3,11 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fake Casino 🎰</title>
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" content="#1b2a1f" />
+  <title>🎰 Fake Casino</title>
+
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Jost Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+  <!-- Favicon (wird in main.js dynamisch ersetzt) -->
+  <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml;utf8,
+        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+          <rect width='64' height='64' rx='12' fill='%23222'/>
+          <circle cx='32' cy='32' r='20' fill='none' stroke='%23ffffff' stroke-width='4'/>
+        </svg>">
 </head>
 <body>
   <header>
@@ -16,14 +29,14 @@
   </header>
 
   <main>
-    <section id="menu">
+    <section id="menu" aria-label="Spielauswahl">
       <h2>Wähle ein Spiel</h2>
-      <button onclick="loadGame('mines')">💣 Mines</button>
-      <button onclick="loadGame('crash')">📈 Crash (coming soon)</button>
-      <button onclick="loadGame('dice')">🎲 Dice (coming soon)</button>
+      <button type="button" onclick="loadGame('mines')">💣 Mines</button>
+      <button type="button" onclick="loadGame('crash')">📈 Crash (coming soon)</button>
+      <button type="button" onclick="loadGame('dice')">🎲 Dice (coming soon)</button>
     </section>
 
-    <section id="game-container">
+    <section id="game-container" aria-live="polite">
       <!-- Hier wird das aktuell ausgewählte Spiel geladen -->
     </section>
   </main>
@@ -32,6 +45,7 @@
     <p>Nur zu Lern- und Spaßzwecken. Kein Echtgeld.</p>
   </footer>
 
+  <noscript>Bitte JavaScript aktivieren, um zu spielen.</noscript>
   <script src="main.js"></script>
 </body>
 </html>

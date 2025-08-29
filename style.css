@@ -1,4 +1,6 @@
 /* Grundlayout */
+html, body { min-height: 100%; }
+
 body {
   font-family: "Jost", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   background: #222;
@@ -229,18 +231,24 @@ button { font-weight: 600; }
   filter: drop-shadow(0 6px 12px rgba(0,0,0,.35));
 }
 
+/* Vollflächiger Screen-Glow (oben/unten/links/rechts) */
 body.cashout-glow::after{
   content:"";
-  position: fixed; inset: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
   pointer-events: none;
-  background: radial-gradient(120% 50% at 50% -10%, rgba(74,222,128,.18), rgba(74,222,128,0) 60%);
+  background:
+    radial-gradient(55% 55% at 50% -10%,  rgba(74,222,128,.18), transparent 70%),
+    radial-gradient(55% 55% at 50% 110%, rgba(74,222,128,.18), transparent 70%),
+    radial-gradient(70% 70% at -10% 50%, rgba(74,222,128,.12), transparent 75%),
+    radial-gradient(70% 70% at 110% 50%, rgba(74,222,128,.12), transparent 75%);
   opacity: 0;
-  animation: screenGlow 600ms ease-out forwards;
+  animation: screenGlow 700ms ease-out forwards;
 }
-
 @keyframes screenGlow{
   0%{opacity:0}
-  20%{opacity:1}
+  25%{opacity:1}
   100%{opacity:0}
 }
 

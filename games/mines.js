@@ -170,21 +170,22 @@ export function initMinesGame(changeBalanceCb) {
     }
   }
 
-  function revealAll(lose) {
-    const cells = gridEl.querySelectorAll(".cell");
-    for (let i = 0; i < CELLS; i++) {
-      const c = cells[i];
-      c.disabled = true;
-      if (bombSet.has(i)) {
-        c.classList.add("bomb");
-        c.textContent = "💣";
-      } else if (revealed.has(i)) {
-        c.classList.add("safe");
-      } else {
-        c.classList.add("hidden");
-      }
+function revealAll(lose) {
+  const cells = gridEl.querySelectorAll(".cell");
+  for (let i = 0; i < CELLS; i++) {
+    const c = cells[i];
+    c.disabled = true;
+    if (bombSet.has(i)) {
+      c.classList.add("bomb");
+      // kein Emoji mehr – CSS-Styles übernehmen Darstellung
+    } else if (revealed.has(i)) {
+      c.classList.add("safe");
+    } else {
+      c.classList.add("hidden");
     }
   }
+}
+
 
   function message(txt) {
     messageEl.textContent = txt;

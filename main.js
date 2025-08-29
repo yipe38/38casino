@@ -3,12 +3,12 @@ const BASE_TITLE = "🎰 Fake Casino";
 let currentGame = ""; // z.B. "Mines"
 
 function refreshTitle() {
-  document.title = `${BASE_TITLE} — ${balance} Coins${currentGame ? " · " + currentGame : ""}`;
+  document.title = `${BASE_TITLE} — ${balance}$ ${currentGame ? " · " + currentGame : ""}`;
 }
 
 function flashTitleWin(amount, ms = 1800) {
   const orig = document.title;
-  const msg  = `💸 +${amount} Coins!`;
+  const msg  = `💸 +${amount}$ WIN!`;
   let on = false;
   const id = setInterval(() => {
     document.title = on ? msg : orig;

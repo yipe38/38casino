@@ -1,5 +1,6 @@
 /* Grundlayout */
-html, body { min-height: 100%; }
+html, body { min-height: 100%; overflow-x: hidden; }
+body.cashout-glow { overflow: hidden; }  /* für die 700 ms Effektzeit */
 
 body {
   font-family: "Jost", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -219,7 +220,7 @@ button { font-weight: 600; }
 /* ===== Cashout FX ===== */
 .fly-amount{
   position: fixed;
-  left: 0; top: 0;
+  left: 50vw; top: 50vh;;
   transform: translate(-50%,-50%);
   z-index: 9999;
   pointer-events: none;
@@ -235,10 +236,14 @@ button { font-weight: 600; }
 body.cashout-glow::after{
   content:"";
   position: fixed;
-  inset: 0;
-  z-index: 99999;
+  inset: 0;                     /* kein negativer Rand */
+  transform: scale(1.02);       /* minimal größer, ohne Layout-Overflow */
+  transform-origin: center;
+  z-index: 2147483647;
   pointer-events: none;
+  will-change: opacity, transform;
   background:
+    rgba(74,222,128,.06),
     radial-gradient(55% 55% at 50% -10%,  rgba(74,222,128,.18), transparent 70%),
     radial-gradient(55% 55% at 50% 110%, rgba(74,222,128,.18), transparent 70%),
     radial-gradient(70% 70% at -10% 50%, rgba(74,222,128,.12), transparent 75%),
@@ -246,6 +251,7 @@ body.cashout-glow::after{
   opacity: 0;
   animation: screenGlow 700ms ease-out forwards;
 }
+
 @keyframes screenGlow{
   0%{opacity:0}
   25%{opacity:1}

@@ -66,9 +66,8 @@ footer {
 }
 
 /* =========================================================
-   Mines Game Styles (ohne Emojis, responsive, zentriert)
+   Mines Game Styles – weißes X für Bombe + Effekte
    ========================================================= */
-
 .mines-panel {
   max-width: 680px;
   margin: 0 auto;
@@ -123,7 +122,7 @@ footer {
   padding: 8px;
 }
 
-/* Zellen – zentriert, ohne Emoji-Layout */
+/* Zellen */
 .cell {
   width: 56px;
   height: 56px;
@@ -131,69 +130,79 @@ footer {
   border: 2px solid #3a3a3a;
   border-radius: 10px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   padding: 0;
-  font-size: 0; /* versteckt ggf. Emoji-Text */
+  font-size: 0;  /* falls irgendwo Text gesetzt wird -> unsichtbar */
   position: relative;
-  transition: filter .15s ease;
+  transition: filter .15s ease, transform .12s ease;
 }
 
 .cell:hover { filter: brightness(1.1); }
 .cell:disabled { cursor: default; }
 
-/* Safe (Häkchen via CSS) */
+/* ✅ SAFE – Häkchen + Pop + sanfter Glow */
 .cell.safe {
   background: #2e7d32;
   border-color: #2a6e2d;
+  box-shadow: 0 0 0 0 rgba(46, 125, 50, 0);
+  animation: safePop .18s ease-out 1, safeGlow 900ms ease-out 1;
 }
 .cell.safe::before {
   content: "";
   width: 18px;
   height: 10px;
-  border-bottom: 4px solid #e6ffe6;
-  border-left: 4px solid #e6ffe6;
+  border-bottom: 4px solid #ffffff;
+  border-left: 4px solid #ffffff;
   transform: rotate(-45deg);
   margin-top: -2px;
-}
-
-/* Bombe (reine CSS-Grafik) */
-.cell.bomb {
-  background: #9b1c1c;
-  border-color: #821818;
-}
-.cell.bomb::before {
-  content: "";
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #111;
-  box-shadow: inset 0 0 0 3px #222, 0 2px 4px rgba(0,0,0,.4);
-}
-.cell.bomb::after {
-  content: "";
-  position: absolute;
-  width: 14px;
-  height: 3px;
-  background: #c93;          /* Zündschnur-Farbe */
-  right: 14px;
-  top: 14px;
-  transform: rotate(35deg);
   border-radius: 2px;
 }
 
-/* Aufgedeckt aber leer (optional leicht abgedunkelt) */
-.cell.hidden {
-  opacity: .7;
+/* ❌ BOMB – weißes X + Shake + Flash */
+.cell.bomb {
+  background: #9b1c1c;
+  border-color: #821818;
+  animation: bombShake .35s linear 1, bombFlash 600ms ease-out 1;
 }
+.cell.bomb::before,
+.cell.bomb::after {
+  content: "";
+  position: absolute;
+  width: 26px;
+  height: 3.5px;
+  background: #ffffff;
+  border-radius: 2px;
+}
+.cell.bomb::before { transform: rotate(45deg); }
+.cell.bomb::after  { transform: rotate(-45deg); }
 
-/* kleine "Explosion"-Animation bei Treffer */
-.cell.blow { animation: shake .35s linear 1; }
-@keyframes shake {
-  0%{ transform: translate(0,0); }
-  25%{ transform: translate(2px,-2px); }
-  50%{ transform: translate(-2px,2px); }
-  75%{ transform: translate(2px,2px); }
-  100%{ transform: translate(0,0); }
+/* bereits aufgedeckt aber leer */
+.cell.hidden { opacity: .7; }
+
+/* Optionale Klasse, wird schon im JS genutzt bei Treffer */
+.cell.blow { /* zusätzliche visuelle Betonung */ }
+
+/* ===================== Animations ===================== */
+@keyframes safePop {
+  0%   { transform: scale(.9); }
+  100% { transform: scale(1); }
+}
+@keyframes safeGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.0); }
+  30%  { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0.15); }
+  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.0); }
+}
+@keyframes bombShake {
+  0%{ transform: translate(0,0) rotate(0); }
+  20%{ transform: translate(3px,-2px) rotate(1deg); }
+  40%{ transform: translate(-3px,2px) rotate(-1deg); }
+  60%{ transform: translate(3px,2px) rotate(1deg); }
+  80%{ transform: translate(-3px,-2px) rotate(-1deg); }
+  100%{ transform: translate(0,0) rotate(0); }
+}
+@keyframes bombFlash {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.0), inset 0 0 0 0 rgba(0,0,0,0); }
+  20%  { box-shadow: 0 0 0 12px rgba(255, 87, 34, 0.25), inset 0 0 12px 0 rgba(255,255,255,.15); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.0), inset 0 0 0 0 rgba(0,0,0,0); }
 }

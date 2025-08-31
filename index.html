@@ -1,51 +1,45 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="color-scheme" content="dark light" />
-  <meta name="theme-color" content="#1b2a1f" />
-  <title>🎰 Fake Casino</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>38Casino</title>
+
+  <!-- Optional: Google Font -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Jost Font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-
-  <!-- Favicon (wird in main.js dynamisch ersetzt) -->
-  <link rel="icon" type="image/svg+xml"
-        href="data:image/svg+xml;utf8,
-        <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
-          <rect width='64' height='64' rx='12' fill='%23222'/>
-          <circle cx='32' cy='32' r='20' fill='none' stroke='%23ffffff' stroke-width='4'/>
-        </svg>">
 </head>
 <body>
   <header>
-    <h1>🎰 Fake Casino</h1>
-    <div id="wallet">Guthaben: <span id="balance">1000</span> Coins</div>
+    <h1>🎰 38Casino</h1>
+    <div id="wallet">Guthaben: <span id="balance">0.00 $</span></div>
   </header>
 
   <main>
-    <section id="menu" aria-label="Spielauswahl">
-      <h2>Wähle ein Spiel</h2>
-      <button type="button" onclick="loadGame('mines')">💣 Mines</button>
-      <button type="button" onclick="loadGame('crash')">📈 Crash (coming soon)</button>
-      <button type="button" onclick="loadGame('dice')">🎲 Dice (coming soon)</button>
-    </section>
+    <!-- Menü -->
+    <div id="menu">
+      <button type="button" data-game="welcome">🏁 Start</button>
+      <button type="button" data-game="bombs">💣 Bombs</button>
+      <button type="button" data-game="chicken-road">🐔 Chicken Road</button>
 
-    <section id="game-container" aria-live="polite">
-      <!-- Hier wird das aktuell ausgewählte Spiel geladen -->
-    </section>
+      <!-- Beispiel-Cashout-Button (kannst du lassen/entfernen) -->
+      <button type="button" id="cashoutBtn">💸 Cashout (Demo)</button>
+    </div>
+
+    <!-- Spielfläche -->
+    <iframe
+      id="game-frame"
+      title="Game Frame"
+      src="games/welcome.html"
+      style="width: min(1100px, 95vw); height: 70vh; border: 2px solid #444; border-radius: 12px; background:#111;">
+    </iframe>
   </main>
 
-  <footer>
-    <p>Nur zu Lern- und Spaßzwecken. Kein Echtgeld.</p>
-  </footer>
-
-  <noscript>Bitte JavaScript aktivieren, um zu spielen.</noscript>
-  <script src="main.js"></script>
+  <!-- SDK für Games (damit Games zentral mit Parent reden) -->
+  <script src="sdk/casino-sdk.js" defer></script>
+  <!-- Hauptlogik -->
+  <script src="main.js" defer></script>
 </body>
 </html>

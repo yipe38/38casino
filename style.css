@@ -1,6 +1,7 @@
 /* Grundlayout */
 html, body { min-height: 100%; overflow-x: hidden; }
-body.cashout-glow { overflow: hidden; }  /* für die 700 ms Effektzeit */
+body.cashout-glow { overflow: hidden; }  /* für die Effektzeit */
+* { box-sizing: border-box; }
 
 body {
   font-family: "Jost", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -32,13 +33,9 @@ h1 {
   font-weight: 700; /* optional */
 }
 
-main {
-  padding: 2rem;
-}
+main { padding: 2rem; }
 
-#menu {
-  margin-bottom: 2rem;
-}
+#menu { margin-bottom: 2rem; }
 
 button {
   background: #444;
@@ -49,11 +46,14 @@ button {
   border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform .06s ease;
 }
-
-button:hover {
-  background: #666;
+button:hover { background: #666; }
+button:active { transform: translateY(1px); }
+button:focus-visible {
+  outline: 2px solid #4ade80;
+  outline-offset: 2px;
+  border-radius: 10px;
 }
 
 #game-container {
@@ -144,6 +144,7 @@ footer {
   font-size: 0;  /* falls irgendwo Text gesetzt wird -> unsichtbar */
   position: relative;
   transition: filter .15s ease, transform .12s ease;
+  will-change: transform, filter;
 }
 
 .cell:hover { filter: brightness(1.1); }
@@ -220,7 +221,7 @@ button { font-weight: 600; }
 /* ===== Cashout FX ===== */
 .fly-amount{
   position: fixed;
-  left: 50vw; top: 50vh;;
+  left: 50vw; top: 50vh;
   transform: translate(-50%,-50%);
   z-index: 9999;
   pointer-events: none;
@@ -232,11 +233,11 @@ button { font-weight: 600; }
   filter: drop-shadow(0 6px 12px rgba(0,0,0,.35));
 }
 
-/* Vollflächiger Screen-Glow (oben/unten/links/rechts) */
+/* Vollflächiger Screen-Glow (ohne Scrollbar) */
 body.cashout-glow::after{
   content:"";
   position: fixed;
-  inset: 0;                     /* kein negativer Rand */
+  inset: 0;
   transform: scale(1.02);       /* minimal größer, ohne Layout-Overflow */
   transform-origin: center;
   z-index: 2147483647;
@@ -251,7 +252,6 @@ body.cashout-glow::after{
   opacity: 0;
   animation: screenGlow 700ms ease-out forwards;
 }
-
 @keyframes screenGlow{
   0%{opacity:0}
   25%{opacity:1}

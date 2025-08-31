@@ -15,7 +15,9 @@ export class MinesUI {
 
   renderBoard() {
     this.root.innerHTML = '';
-    this.root.style.gridTemplateColumns = `repeat(${this.game.cols}, 1fr)`;
+    // <-- HIER die Änderung: feste Zellbreite statt 1fr
+    this.root.style.gridTemplateColumns = `repeat(${this.game.cols}, var(--cell))`;
+
     this.cells = new Array(this.game.total).fill(null).map((_, i) => {
       const cell = document.createElement('div');
       cell.className = 'cell';

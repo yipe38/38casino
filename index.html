@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Casino38 • Mines</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+    <link rel="stylesheet" href="./src/mines.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <span class="logo">C38</span>
+        <h1>Mines</h1>
+      </div>
+      <div class="wallet">
+        <span>Balance:</span>
+        <strong id="balance">1000.00</strong>
+        <span class="unit">⚪︎</span>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="controls">
+        <div class="control-group">
+          <label for="bet">Einsatz</label>
+          <div class="bet-row">
+            <button class="chip" data-chip="0.5">+0.5</button>
+            <button class="chip" data-chip="1">+1</button>
+            <button class="chip" data-chip="5">+5</button>
+            <button class="chip" data-chip="10">+10</button>
+            <input id="bet" type="number" min="0.1" step="0.1" value="1.0" />
+            <button id="half">½</button>
+            <button id="double">2×</button>
+            <button id="clear">C</button>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <div class="control-group">
+            <label for="grid">Grid</label>
+            <select id="grid">
+              <option value="5x5" selected>5 × 5</option>
+              <option value="6x6">6 × 6</option>
+              <option value="7x7">7 × 7</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label for="bombs">Bomben</label>
+            <select id="bombs"></select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="newRound" class="primary">Neue Runde</button>
+          <button id="cashout" class="success" disabled>Cashout</button>
+          <div class="statline">
+            <span>Hits: <strong id="hits">0</strong></span>
+            <span>Multi: <strong id="multiplier">1.00×</strong></span>
+            <span>Cashout: <strong id="payout">0.00</strong></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="board-wrap">
+        <div id="board" class="board"></div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <small>Casino38 • Mines (Standalone MVP)</small>
+    </footer>
+
+    <div id="cashoutPulse" class="cashout-pulse" aria-hidden="true"></div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

@@ -1,193 +1,115 @@
-// src/main.js
-import { newRound } from './mines.js';
+// src/mines.js
+// Casino-Style Mines: pure Glück/Pech (keine Zahlen/Hinweise)
+// Fairer Multiplikator wächst pro Safe als 1/pSafe; House-Edge pro Pick optional.
+// -> HOUSE_EDGE_PER_PICK = 1.00  (fair)
+// -> < 1.00 = Hausvorteil (z.B. 0.99 = ~1% Edge pro Safe)
 
-const boardEl = document.getElementById('board');
-const bombsSel = document.getElementById('bombs');
-const gridSel  = document.getElementById('grid');
-const betInput = document.getElementById('bet');
+const HOUSE_EDGE_PER_PICK = 0.98; // 2% Edge pro erfolgreichem Pick; setz auf 1.00 für fair
 
-const hitsEl   = document.getElementById('hits');
-const multEl   = document.getElementById('multiplier');
-const payoutEl = document.getElementById('payout');
+export function newRound(boardEl, size, bombs, onUpdate) {
+  const total = size * size;
+  const safesTotal = total - bombs;
 
-const btnNew   = document.getElementById('newRound');
-const btnCash  = document.getElementById('cashout');
-const pulseEl  = document.getElementById('cashoutPulse');
-const balanceEl= document.getElementById('balance');
+  // State
+  const cells = Array.from({ length: total }, () => ({ bomb: false, open: false }));
+  const bombIdx = pickBombs(total, bombs);
+  bombIdx.forEach(i => (cells[i].bomb = true));
 
-// --- Round / Wallet State ---
-let round = null;
-let roundActive = false;    // eine laufende Runde?
-let roundBet = 0;           // Einsatz der aktuellen Runde
+  // Render
+  boardEl.replaceChildren();
+  boardEl.dataset.size = String(size);
 
-let current = { size: 5, bombs: 5, hits: 0, multiplier: 1, ended: false, busted: false };
-
-// ----------------------- Init -----------------------
-init();
-
-function init() {
-  // Grid → Bombenliste
-  gridSel.addEventListener('change', rebuildBombOptions);
-  rebuildBombOptions();
-
-  // Buttons
-  btnNew.addEventListener('click', startRound);
-  btnCash.addEventListener('click', doCashout);
-
-  // Autostart einer ersten Runde ohne Abzug? -> Nein.
-  // User entscheidet selbst: Start nur per Button.
-  updateHUD();
-}
-
-// ----------------------- UI Helpers -----------------------
-function rebuildBombOptions() {
-  const [w, h] = gridSel.value.split('x').map(Number);
-  const size = w;
-  bombsSel.replaceChildren();
-
-  // 1..(size^2 - 1)
-  for (let i = 1; i < size * size; i++) {
-    const opt = document.createElement('option');
-    opt.value = i;
-    opt.textContent = i;
-    bombsSel.appendChild(opt);
-  }
-  bombsSel.value = Math.round((size * size) * 0.2); // ~20%
-}
-
-// ----------------------- Balance -----------------------
-function getBalance() {
-  return parseFloat((balanceEl.textContent || '0').replace(',', '.')) || 0;
-}
-function setBalance(v) {
-  balanceEl.textContent = toMoney(v);
-}
-function toMoney(v) {
-  return (Math.round(v * 100) / 100).toFixed(2);
-}
-function getBet() {
-  const v = parseFloat((betInput.value || '1').replace(',', '.')) || 1;
-  return Math.max(0.1, Math.round(v * 100) / 100);
-}
-
-// ----------------------- Round Flow -----------------------
-function startRound() {
-  // keine neue Runde, falls noch aktiv
-  if (roundActive && !current.ended && !current.busted) {
-    console.warn('Runde läuft bereits. Erst cashouten oder busten.');
-    return;
+  for (let i = 0; i < total; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'cell hidden';
+    btn.dataset.idx = i;
+    btn.addEventListener('click', () => reveal(i));
+    boardEl.appendChild(btn);
   }
 
-  const [w] = gridSel.value.split('x').map(Number);
-  const size = w;
-  const bombs = Number(bombsSel.value);
-  const bet = getBet();
-  const balance = getBalance();
+  // Laufende Variablen
+  let hits = 0;
+  let multiplier = 1.0;        // Start bei 1.00x
+  let ended = false;
 
-  // genug Guthaben?
-  if (bet > balance) {
-    // kleines visuelles Feedback
-    betInput.classList.add('shake');
-    setTimeout(() => betInput.classList.remove('shake'), 400);
-    console.warn('Zu wenig Guthaben.');
-    return;
-  }
+  // Wahrscheinlichkeiten
+  let remainingTotal = total;
+  let remainingSafes = safesTotal;
 
-  // Einsatz abziehen
-  setBalance(balance - bet);
-  roundBet = bet;
+  emit();
 
-  // UI sperren bis Runde beendet
-  betInput.disabled = true;
-  gridSel.disabled = true;
-  bombsSel.disabled = true;
-  btnCash.disabled = true;
+  function reveal(i) {
+    if (ended) return;
 
-  // State reset
-  current = { size, bombs, hits: 0, multiplier: 1, ended: false, busted: false };
-  updateHUD();
+    const cell = cells[i];
+    const btn = boardEl.querySelector(`.cell[data-idx="${i}"]`);
+    if (!btn || !btn.classList.contains('hidden')) return;
 
-  // Board erstellen
-  round = newRound(boardEl, size, bombs, ({ hits, multiplier, ended, busted }) => {
-    current.hits = hits;
-    current.multiplier = multiplier;
-    current.ended = ended;
-    current.busted = busted;
+    // pSafe vor dem Öffnen berechnen
+    const pSafe = remainingSafes / remainingTotal; // Überlebenswahrscheinlichkeit dieses Klicks
 
-    // Cashout-Button aktivieren, sobald min. 1 Safe
-    btnCash.disabled = ended || busted || hits <= 0;
+    // Feld öffnen
+    btn.classList.remove('hidden');
+    cell.open = true;
+    remainingTotal -= 1;
 
-    // Wenn direkt gebustet wurde, Runde schließen
-    if (ended && busted) {
-      finishRound(false); // kein Gewinn, Einsatz bleibt weg
-    } else {
-      updateHUD();
+    if (cell.bomb) {
+      // BUST
+      btn.classList.add('bomb');
+      btn.textContent = '💣';
+      ended = true;
+      showAllBombs();
+      onUpdate({ hits, multiplier: 0, ended: true, busted: true });
+      return;
     }
-  });
 
-  roundActive = true;
-}
+    // SAFE (keine Hinweise/Zahlen)
+    hits += 1;
+    remainingSafes -= 1;
+    btn.classList.add('safe');
 
-function doCashout() {
-  if (!roundActive || current.ended || current.busted || current.hits <= 0) return;
+    // KORREKT: Multi wächst um 1/pSafe (und Edge pro Pick)
+    // -> kompensiert die Überlebenswahrscheinlichkeit und lässt den Auszahlungsfaktor steigen
+    multiplier = multiplier * (1 / pSafe) * HOUSE_EDGE_PER_PICK;
 
-  const payout = roundBet * current.multiplier;
-
-  // Glow
-  pulseEl.classList.add('active');
-  setTimeout(() => pulseEl.classList.remove('active'), 600);
-
-  // Board offen zeigen & Runde beenden
-  round?.openAll();
-  current.ended = true;
-  btnCash.disabled = true;
-
-  finishRound(true, payout);
-}
-
-function finishRound(won, payout = 0) {
-  // UI wieder freigeben
-  betInput.disabled = false;
-  gridSel.disabled = false;
-  bombsSel.disabled = false;
-
-  if (won && payout > 0) {
-    setBalance(getBalance() + payout); // Auszahlung brutto (Stake + Gewinn)
-    payoutEl.textContent = toMoney(payout);
-  } else {
-    // Bust: Payout 0.00
-    payoutEl.textContent = '0.00';
+    emit();
   }
 
-  roundActive = false;
-  updateHUD();
+  function emit() {
+    // fürs HUD nur hübsch runden; intern behalten wir volle Präzision
+    onUpdate({ hits, multiplier: +multiplier.toFixed(2), ended: false, busted: false });
+  }
+
+  function showAllBombs() {
+    cells.forEach((c, j) => {
+      const b = boardEl.querySelector(`.cell[data-idx="${j}"]`);
+      if (!b) return;
+      if (b.classList.contains('hidden')) b.classList.remove('hidden');
+      if (c.bomb) {
+        b.classList.add('bomb');
+        b.textContent = '💣';
+      } else {
+        b.classList.add('safe');
+      }
+    });
+  }
+
+  return {
+    openAll: () => {
+      cells.forEach((c, j) => {
+        const b = boardEl.querySelector(`.cell[data-idx="${j}"]`);
+        if (!b) return;
+        if (b.classList.contains('hidden')) b.classList.remove('hidden');
+        b.classList.add(c.bomb ? 'bomb' : 'safe');
+        if (c.bomb) b.textContent = '💣';
+      });
+    }
+  };
 }
 
-// ----------------------- HUD -----------------------
-function updateHUD() {
-  hitsEl.textContent = String(current.hits);
-  multEl.textContent = `${(current.multiplier || 1).toFixed(2)}×`;
-
-  // Vorschau-Cashout (ohne tatsächliche Auszahlung)
-  if (roundActive && current.hits > 0 && !current.busted && !current.ended) {
-    const preview = roundBet * current.multiplier;
-    payoutEl.textContent = toMoney(preview);
-  } else if (!roundActive) {
-    // außerhalb einer Runde: Vorschau basierend auf aktuellem Bet
-    const preview = getBet() * (current.multiplier || 1);
-    payoutEl.textContent = toMoney(preview);
-  }
+/* Helpers */
+function pickBombs(total, bombs) {
+  const set = new Set();
+  while (set.size < bombs) set.add(Math.floor(Math.random() * total));
+  return [...set];
 }
-
-// --- kleiner CSS Shake-Effekt für Bet bei zu wenig Guthaben ---
-const style = document.createElement('style');
-style.textContent = `
-  .shake { animation: c38-shake 0.4s; }
-  @keyframes c38-shake {
-    10%, 90% { transform: translateX(-1px); }
-    20%, 80% { transform: translateX(2px); }
-    30%, 50%, 70% { transform: translateX(-4px); }
-    40%, 60% { transform: translateX(4px); }
-  }
-`;
-document.head.appendChild(style);
